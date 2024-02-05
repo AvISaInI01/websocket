@@ -1,5 +1,5 @@
 const app = require("./app");
-
+const fs = require("fs");
 const socketIO = require("socket.io");
 const http = require("http");
 const port = process.env.PORT || 3000;
@@ -10,19 +10,22 @@ const io = socketIO(server);
 io.on("connection", (socket) => {
   console.log("New user connected");
   //emit message from server to user
-  socket.emit("newMessage", {
-    from: "jen@mds",
-    text: "hepppp",
+  io.emit("newUserConnected", {
+    user: socket.handshake,
   });
-
+  console.log(socket.id);
   // listen for message from user
   socket.on("createMessage", (newMessage) => {
-    console.log("newMessage", newMessage);
-    socket.emit("respone", {
-      message: "Soja bsdk",
+    io.emit("respone", {
+      message: newMessage,
     });
   });
 
+  socket.on("message", () => {});
+
+  socket.onAny((event, ...args) => {
+    console.log(event, args);
+  });
   // when server disconnects from user
   socket.on("disconnect", () => {
     console.log("disconnected from user");
@@ -30,5 +33,7 @@ io.on("connection", (socket) => {
 });
 
 server.listen(port, () => {
-  console.log(`server running on port : ${port}`);
+  console.log(
+    `server running on port : ${port} url : http://localhost:${port}/`
+  );
 });

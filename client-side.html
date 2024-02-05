@@ -6,27 +6,48 @@
   </head>
 
   <body class="chat">
+    <form id="connect">
+      <input id="user" name="user" />
+      <button type="submit">Connect to server</button>
+    </form>
     <form id="message-form">
       <input
         name="message"
         type="text"
         placeholder="Message"
         autofocus
-        autocomplete="off"
+        autocomplete="on"
       />
+      <!-- <label htmlFor="csv_file">
+        upload CSV file
+        <input id="csv_file" type="file" name="csv" />
+      </label> -->
       <button type="submit">Send</button>
     </form>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-      var socket = io("http://localhost:3001");
-
+      var socket = io("http://localhost:3000", { autoConnect: false });
+      /**  */
+      document.getElementById("connect").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const user = document.querySelector("input[name=user]").value;
+        if (user == "") return alert("enter username to connect server");
+        onUsernameSelection(user);
+      });
+      function onUsernameSelection(username) {
+        this.usernameAlreadySelected = true;
+        socket.auth = { username };
+        socket.connect();
+      }
       // connection with server
       socket.on("connect", function () {
         console.log("Connected to Server");
       });
-
       // message listener from server
       socket.on("newMessage", function (message) {
+        console.log(message);
+      });
+      socket.on("newUserConnected", (message) => {
         console.log(message);
       });
       // message listener from server
@@ -40,11 +61,11 @@
         .addEventListener("submit", function (e) {
           // prevent the form from submitting
           e.preventDefault();
-
           // emit message from user side
           socket.emit("createMessage", {
             to: "john@ds",
             text: document.querySelector("input[name=message]").value,
+            // file: document.querySelector("input[name=csv]").files[0],
           });
         });
 

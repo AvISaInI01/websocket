@@ -2,7 +2,11 @@ const app = require("./app");
 const socketIO = require("socket.io");
 const http = require("http");
 const port = process.env.PORT || 3001;
-const server = http.createServer(app);
+const server = http.createServer(app, {
+  cors: {
+    origin: "http://localhost:8080",
+  },
+});
 const io = socketIO(server);
 
 server.listen(port, () => {
